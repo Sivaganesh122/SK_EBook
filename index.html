@@ -76,6 +76,20 @@
         #savedText {
             font-size: 16px;
         }
+
+        #fileList {
+            margin-top: 20px;
+            text-align: left;
+        }
+
+        #fileList li {
+            cursor: pointer;
+            margin: 5px;
+        }
+
+        #fileList li:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
@@ -86,8 +100,10 @@
         <textarea id="ebookContent" placeholder="Write your e-book here..."></textarea>
 
         <button id="saveButton">Save</button>
-        <button id="loadButton">Load</button>
         <button id="clearButton">Clear</button>
+
+        <h2>Saved E-Books</h2>
+        <ul id="fileList"></ul>
 
         <div id="savedContent" class="savedContent">
             <h2>Your Saved E-Book:</h2>
@@ -97,40 +113,58 @@
     </div>
 
     <script>
+        // Load saved files from localStorage and display them in a list
+        function loadSavedFiles() {
+            const savedEbooks = JSON.parse(localStorage.getItem('ebooks')) || [];
+            const fileList = document.getElementById('fileList');
+            fileList.innerHTML = '';  // Clear existing list
+
+            savedEbooks.forEach((ebook, index) => {
+                const listItem = document.createElement('li');
+                listItem.textContent = ebook.title;
+                listItem.onclick = function () {
+                    loadEbookForEditing(index);
+                };
+                fileList.appendChild(listItem);
+            });
+        }
+
         // Save the E-Book to localStorage
         document.getElementById('saveButton').addEventListener('click', function() {
             const title = document.getElementById('ebookTitle').value;
             const content = document.getElementById('ebookContent').value;
+
             if (title && content) {
-                // Save title and content as an object
+                const savedEbooks = JSON.parse(localStorage.getItem('ebooks')) || [];
                 const ebookData = { title: title, content: content };
-                localStorage.setItem('ebookData', JSON.stringify(ebookData));
+                savedEbooks.push(ebookData);
+                localStorage.setItem('ebooks', JSON.stringify(savedEbooks));
                 alert('Your e-book has been saved!');
+                loadSavedFiles(); // Refresh the list of saved files
             } else {
                 alert('Please enter both title and content before saving.');
             }
         });
 
-        // Load saved E-Book from localStorage
-        document.getElementById('loadButton').addEventListener('click', function() {
-            const savedEbook = localStorage.getItem('ebookData');
-            if (savedEbook) {
-                const ebookData = JSON.parse(savedEbook);
-                document.getElementById('savedTitle').innerText = ebookData.title;
-                document.getElementById('savedText').innerText = ebookData.content;
-                document.getElementById('savedContent').style.display = 'block';
-            } else {
-                alert('No saved e-book found!');
-            }
-        });
+        // Load the selected E-Book for editing
+        function loadEbookForEditing(index) {
+            const savedEbooks = JSON.parse(localStorage.getItem('ebooks')) || [];
+            const ebookData = savedEbooks[index];
+
+            document.getElementById('ebookTitle').value = ebookData.title;
+            document.getElementById('ebookContent').value = ebookData.content;
+        }
 
         // Clear the content from the textarea and localStorage
         document.getElementById('clearButton').addEventListener('click', function() {
             document.getElementById('ebookTitle').value = '';
             document.getElementById('ebookContent').value = '';
-            localStorage.removeItem('ebookData');
-            alert('Your e-book has been cleared.');
         });
+
+        // Load the saved files when the page is loaded
+        window.onload = function () {
+            loadSavedFiles();
+        };
     </script>
 </body>
 </html>

@@ -3,142 +3,108 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>E-Book Writer</title>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js"></script>
+    <title>E-Book</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            text-align: center;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
-        }
-        h1 {
-            background: #007BFF;
-            color: white;
-            padding: 15px;
+            background-color: #f4f4f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
             margin: 0;
         }
+
         .container {
-            width: 80%;
-            margin: 20px auto;
-            background: white;
-            padding: 15px;
+            background-color: white;
+            padding: 20px;
             border-radius: 8px;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 80%;
+            max-width: 600px;
+            text-align: center;
         }
+
         textarea {
             width: 100%;
-            height: 200px;
+            height: 300px;
             padding: 10px;
+            font-size: 16px;
             border: 1px solid #ccc;
             border-radius: 5px;
-            font-size: 16px;
+            margin-bottom: 20px;
         }
+
         button {
-            margin-top: 10px;
-            padding: 10px;
-            background: #007BFF;
+            padding: 10px 20px;
+            background-color: #4CAF50;
             color: white;
             border: none;
-            cursor: pointer;
-            font-size: 16px;
             border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+            font-size: 16px;
         }
+
         button:hover {
-            background: #0056b3;
+            background-color: #45a049;
         }
-        .books {
+
+        .savedContent {
             margin-top: 20px;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+            display: none;
             text-align: left;
         }
-        .book-item {
-            background: #e9ecef;
-            padding: 10px;
-            margin: 5px 0;
-            border-radius: 5px;
-            cursor: pointer;
+
+        h2 {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+
+        #savedText {
+            font-size: 16px;
         }
     </style>
 </head>
 <body>
-
-    <h1>E-Book Writer</h1>
-
     <div class="container">
-        <h3>Write Your E-Book</h3>
-        <input type="text" id="title" placeholder="Enter Book Title" style="width: 100%; padding: 10px; font-size: 16px;">
-        <textarea id="content" placeholder="Write your e-book here..."></textarea>
-        <button onclick="saveBook()">Save E-Book</button>
+        <h1>Create Your E-Book</h1>
+        
+        <textarea id="ebookContent" placeholder="Write your e-book here..."></textarea>
+        
+        <button id="saveButton">Save</button>
+        <button id="loadButton">Load</button>
+        
+        <div id="savedContent" class="savedContent">
+            <h2>Your Saved E-Book:</h2>
+            <p id="savedText"></p>
+        </div>
     </div>
-
-    <div class="container books">
-        <h3>Your E-Books</h3>
-        <div id="bookList"></div>
-    </div>
-
+    
     <script>
-        // Firebase Configuration - Replace with your own Firebase credentials
-        const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_AUTH_DOMAIN",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_STORAGE_BUCKET",
-            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-            appId: "YOUR_APP_ID"
-        };
-
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-
-        // Function to Save E-Book
-        function saveBook() {
-            const title = document.getElementById("title").value;
-            const content = document.getElementById("content").value;
-
-            if (title.trim() === "" || content.trim() === "") {
-                alert("Please enter a title and content.");
-                return;
+        document.getElementById('saveButton').addEventListener('click', function() {
+            const content = document.getElementById('ebookContent').value;
+            if (content) {
+                // Save to localStorage
+                localStorage.setItem('ebookContent', content);
+                alert('Your e-book has been saved!');
+            } else {
+                alert('Please write something before saving.');
             }
+        });
 
-            db.collection("ebooks").add({
-                title: title,
-                content: content,
-                timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            })
-            .then(() => {
-                alert("E-Book Saved!");
-                document.getElementById("title").value = "";
-                document.getElementById("content").value = "";
-                loadBooks(); // Refresh the book list
-            })
-            .catch(error => console.error("Error saving e-book: ", error));
-        }
-
-        // Function to Load E-Books
-        function loadBooks() {
-            const bookList = document.getElementById("bookList");
-            bookList.innerHTML = "";
-
-            db.collection("ebooks").orderBy("timestamp", "desc").get()
-            .then(snapshot => {
-                snapshot.forEach(doc => {
-                    const book = doc.data();
-                    const bookItem = document.createElement("div");
-                    bookItem.classList.add("book-item");
-                    bookItem.innerHTML = <strong>${book.title}</strong>;
-                    bookItem.onclick = () => alert(book.content);
-                    bookList.appendChild(bookItem);
-                });
-            })
-            .catch(error => console.error("Error loading books: ", error));
-        }
-
-        // Load Books on Page Load
-        window.onload = loadBooks;
+        document.getElementById('loadButton').addEventListener('click', function() {
+            const savedContent = localStorage.getItem('ebookContent');
+            if (savedContent) {
+                document.getElementById('savedText').innerText = savedContent;
+                document.getElementById('savedContent').style.display = 'block';
+            } else {
+                alert('No saved e-book found!');
+            }
+        });
     </script>
-
 </body>
 </html>

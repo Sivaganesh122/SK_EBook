@@ -35,6 +35,15 @@
             margin-bottom: 20px;
         }
 
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
         button {
             padding: 10px 20px;
             background-color: #4CAF50;
@@ -72,38 +81,55 @@
 <body>
     <div class="container">
         <h1>Create Your E-Book</h1>
-        
+
+        <input type="text" id="ebookTitle" placeholder="Enter E-Book Title" />
         <textarea id="ebookContent" placeholder="Write your e-book here..."></textarea>
-        
+
         <button id="saveButton">Save</button>
         <button id="loadButton">Load</button>
-        
+        <button id="clearButton">Clear</button>
+
         <div id="savedContent" class="savedContent">
             <h2>Your Saved E-Book:</h2>
+            <h3 id="savedTitle"></h3>
             <p id="savedText"></p>
         </div>
     </div>
-    
+
     <script>
+        // Save the E-Book to localStorage
         document.getElementById('saveButton').addEventListener('click', function() {
+            const title = document.getElementById('ebookTitle').value;
             const content = document.getElementById('ebookContent').value;
-            if (content) {
-                // Save to localStorage
-                localStorage.setItem('ebookContent', content);
+            if (title && content) {
+                // Save title and content as an object
+                const ebookData = { title: title, content: content };
+                localStorage.setItem('ebookData', JSON.stringify(ebookData));
                 alert('Your e-book has been saved!');
             } else {
-                alert('Please write something before saving.');
+                alert('Please enter both title and content before saving.');
             }
         });
 
+        // Load saved E-Book from localStorage
         document.getElementById('loadButton').addEventListener('click', function() {
-            const savedContent = localStorage.getItem('ebookContent');
-            if (savedContent) {
-                document.getElementById('savedText').innerText = savedContent;
+            const savedEbook = localStorage.getItem('ebookData');
+            if (savedEbook) {
+                const ebookData = JSON.parse(savedEbook);
+                document.getElementById('savedTitle').innerText = ebookData.title;
+                document.getElementById('savedText').innerText = ebookData.content;
                 document.getElementById('savedContent').style.display = 'block';
             } else {
                 alert('No saved e-book found!');
             }
+        });
+
+        // Clear the content from the textarea and localStorage
+        document.getElementById('clearButton').addEventListener('click', function() {
+            document.getElementById('ebookTitle').value = '';
+            document.getElementById('ebookContent').value = '';
+            localStorage.removeItem('ebookData');
+            alert('Your e-book has been cleared.');
         });
     </script>
 </body>
